@@ -19,9 +19,14 @@ NEXT_PUBLIC_CA — optional contract address
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID — optional, injected wallets work without it
 NEXT_PUBLIC_RPC_URL — optional, defaults to the public Robinhood Chain RPC
 
+## Deploy on Netlify
+
+The repo includes netlify.toml. Build command is `npm run build`, publish directory is `out`.
+If an old deploy 404s, trigger a new deploy after this commit so Netlify picks up those settings.
+
 ## Deploy on Vercel
 
-Import as a Next.js project. Set the env vars in the Vercel dashboard. vercel.json pins the framework.
+Import as a Next.js project. Set the env vars in the Vercel dashboard.
 
 ## Add Robinhood Chain to MetaMask
 
