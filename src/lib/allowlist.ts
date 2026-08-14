@@ -1,6 +1,14 @@
-import { isAddress, type Address, type PublicClient } from "viem";
+import { type Address, type PublicClient } from "viem";
 import { STOCKS } from "@/config";
 import { erc20Abi } from "@/lib/abis";
+
+const ADDRESS_RE = /^0x[0-9a-f]{40}$/;
+
+function normalizeAddress(address: string): string | null {
+  const normalized = address.trim().toLowerCase();
+  if (!ADDRESS_RE.test(normalized)) return null;
+  return normalized;
+}
 
 /** Official on-chain ERC-20 names end with this suffix. */
 export const OFFICIAL_NAME_SUFFIX = " • Robinhood Token";
@@ -36,13 +44,15 @@ const OFFICIAL_NAME_BY_ADDRESS = new Map(
  * Case-insensitive. A matching ticker at any other address is fake.
  */
 export function isOfficialStockToken(address: string): boolean {
-  if (!address || !isAddress(address)) return false;
-  return OFFICIAL_STOCK_ADDRESSES.has(address.toLowerCase());
+  const normalized = normalizeAddress(address);
+  if (!normalized) return false;
+  return OFFICIAL_STOCK_ADDRESSES.has(normalized);
 }
 
 export function officialNameFor(address: string): string | undefined {
-  if (!address || !isAddress(address)) return undefined;
-  return OFFICIAL_NAME_BY_ADDRESS.get(address.toLowerCase());
+  const normalized = normalizeAddress(address);
+  if (!normalized) return undefined;
+  return OFFICIAL_NAME_BY_ADDRESS.get(normalized);
 }
 
 export function hasOfficialStockTokenName(name: string): boolean {
