@@ -18,6 +18,7 @@ import {
   WETH,
   type StockToken,
 } from "@/config";
+import { isOfficialStockToken } from "@/lib/allowlist";
 import {
   exactInputSingleAbi,
   factoryAbi,
@@ -134,6 +135,9 @@ export async function quoteGift(
   token: StockToken,
   usdAmount: number,
 ): Promise<QuoteResult> {
+  if (!isOfficialStockToken(token.address)) {
+    return { ok: false, error: "Token is not an official stock token." };
+  }
   if (!token.tradeable) {
     return { ok: false, error: "No liquidity" };
   }
@@ -231,6 +235,12 @@ export function encodeCreateGiftCalldata(args: {
 }): { data: Hex; value: bigint } {
   if (args.amountOutMinimum === BigInt(0)) {
     throw new Error("amountOutMinimum must not be zero");
+  }
+  if (!isOfficialStockToken(args.token.address)) {
+    throw new Error("tokenOut is not an official stock token CA");
+  }
+  if (args.gift === zeroAddress) {
+    throw new Error("gift recipient must not be the zero address");
   }
   const inner = encodeFunctionData({
     abi: exactInputSingleAbi,

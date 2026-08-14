@@ -1,5 +1,24 @@
 import { defineChain, type Address, type Hex } from "viem";
 
+/**
+ * Canonical Robinhood Chain constants.
+ *
+ * Sources (verified 2026-08-14):
+ * - Stock token CAs: https://docs.robinhood.com/chain/contracts
+ *   and GET https://api.robinhood.com/rhj/assets
+ * - Uniswap v3 / periphery: https://github.com/Uniswap/contracts/blob/main/deployments/4663.md
+ *
+ * Stock Tokens are not available to US persons. This app does not geo-bypass
+ * that restriction.
+ *
+ * There is no official USDC on this chain. USDG
+ * (0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168, 6 decimals) is the USD stable.
+ *
+ * Official on-chain ERC-20 names end with " • Robinhood Token"
+ * (e.g. "NVIDIA • Robinhood Token", "Alphabet Class A • Robinhood Token").
+ * A matching ticker at any other address is fake — only the hardcoded
+ * allowlist CAs are official. See isOfficialStockToken().
+ */
 export const ROBINHOOD_CHAIN_ID = 4663;
 export const DEFAULT_RPC_URL = "https://rpc.mainnet.chain.robinhood.com";
 export const EXPLORER_URL = "https://robinhoodchain.blockscout.com";
@@ -19,12 +38,15 @@ export const robinhoodChain = defineChain({
 });
 
 export const WETH = "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73" as const;
+/** USDG — 6 decimals. Not USDC; there is no official USDC on chain 4663. */
 export const USDG = "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168" as const;
+export const USDG_DECIMALS = 6;
 
 export const UNISWAP = {
   factory: "0x1f7d7550B1b028f7571E69A784071F0205FD2EfA" as Address,
   quoterV2: "0x33e885eD0Ec9bF04EcfB19341582aADCb4c8A9E7" as Address,
   swapRouter02: "0xCaf681a66D020601342297493863E78C959E5cb2" as Address,
+  /** Listed only. v1 does not encode Universal Router execute. */
   universalRouter: "0x8876789976dEcBfCbBbe364623C63652db8C0904" as Address,
   permit2: "0x000000000022D473030F116dDEE9F6B43aC78BA3" as Address,
 } as const;
@@ -99,7 +121,9 @@ export const STOCKS: StockToken[] = [
     address: "0x2e0847E8910a9732eB3fb1bb4b70a580ADAD4FE3",
     icon: "https://cdn.robinhood.com/ncw_assets/logos/0x2e0847e8910a9732eb3fb1bb4b70a580adad4fe3.png",
     decimals: 18,
-    fee: 3000,
+    // Only WETH v3 pool on 4663 is fee 500 with zero liquidity (RPC 2026-08-14).
+    // Keep disabled; fee 500 so a later enable hits the real pool, not 3000.
+    fee: 500,
     slippageBps: 100,
     tradeable: false,
   },
